@@ -174,9 +174,21 @@ class AppGame():
 
         # print ('start', len(self.block_list))
 
-        pygame.sprite.groupcollide(self.block_list_destruct, self.bullet_list, True, True)
+        group_hit_list = pygame.sprite.groupcollide(self.block_list_destruct, self.bullet_list, False, True)
+
+        for block in group_hit_list:
+
+            block.health -= 1
+
+            if block.health <= 0:
+                self.block_list_destruct.remove(block)
+                self.block_list.remove(block)
+
+            print(block.health)
 
         pygame.sprite.groupcollide(self.block_list_undestruct, self.bullet_list, False, True)
+
+        pygame.sprite
 
         self.player.del_bull()  # проверка выхода пули за экран и удаление
 
