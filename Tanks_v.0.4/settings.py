@@ -1,10 +1,10 @@
-#*************** settings window ***************
+# *************** settings window ***************
 
 WIDTH_WIN = 1024
 
 HEIGHT_WIN = 768
 
-#*************** settings sprite ***************
+# *************** settings sprite ***************
 
 PLAYER_TANK = 'Image/tanks/tank-player-3.png'
 

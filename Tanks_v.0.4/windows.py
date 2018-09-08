@@ -1,8 +1,3 @@
-
-import sys
-
-import os
-
 import pygame
 
 import settings
@@ -13,12 +8,11 @@ import settings
 class Windows():
 
     def __init__(self):
-
         # *************** окно Game_Window ***************
 
         self.bg = pygame.image.load(settings.WALLPAPER)
 
-    # *************** окно Results_Window ***************
+        # *************** окно Results_Window ***************
 
         self.rect_color_RW = (0, 0, 139)  # цвет окна
 
@@ -26,7 +20,7 @@ class Windows():
 
         self.rect_width_RW = 0  # заливка
 
-    # *************** окно Chat_Window ***************
+        # *************** окно Chat_Window ***************
 
         self.rect_color_CW = (152, 251, 152)  # цвет окна
 
@@ -37,11 +31,10 @@ class Windows():
     # *************** рисуем окна ***************
 
     def draw_windows(self, screen):
-
-        screen.blit(self.bg, (0,0))
+        screen.blit(self.bg, (0, 0))
 
         pygame.draw.rect(screen, self.rect_color_RW, self.rect_rect_RW,
-                        self.rect_width_RW)  # рисуем окно Results_Window
+                         self.rect_width_RW)  # рисуем окно Results_Window
 
         pygame.draw.rect(screen, self.rect_color_CW, self.rect_rect_CW,
-                        self.rect_width_CW)  # рисуем окно Chat_Window
+                         self.rect_width_CW)  # рисуем окно Chat_Window

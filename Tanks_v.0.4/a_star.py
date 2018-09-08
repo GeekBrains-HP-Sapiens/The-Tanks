@@ -55,7 +55,8 @@ class AStar(object):
         self.start = self.get_cell(*start)
         self.end = self.get_cell(*end)
 
-        print ('WALLS IN ASTAR  ', len(walls))
+        print('WALLS IN ASTAR  ', len(walls))
+
     def get_heuristic(self, cell):
         """Compute the heuristic value H for a cell.
 
@@ -83,14 +84,14 @@ class AStar(object):
         @returns adjacent cells list.
         """
         cells = []
-        if cell.x < self.grid_width-1:
-            cells.append(self.get_cell(cell.x+1, cell.y))
+        if cell.x < self.grid_width - 1:
+            cells.append(self.get_cell(cell.x + 1, cell.y))
         if cell.y > 0:
-            cells.append(self.get_cell(cell.x, cell.y-1))
+            cells.append(self.get_cell(cell.x, cell.y - 1))
         if cell.x > 0:
-            cells.append(self.get_cell(cell.x-1, cell.y))
-        if cell.y < self.grid_height-1:
-            cells.append(self.get_cell(cell.x, cell.y+1))
+            cells.append(self.get_cell(cell.x - 1, cell.y))
+        if cell.y < self.grid_height - 1:
+            cells.append(self.get_cell(cell.x, cell.y + 1))
         return cells
 
     def get_path(self):
@@ -102,7 +103,7 @@ class AStar(object):
 
         path.append((self.start.x, self.start.y))
         path.reverse()
-        #print path
+        # print path
         return path
 
     def update_cell(self, adj, cell):
