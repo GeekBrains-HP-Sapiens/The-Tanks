@@ -176,7 +176,7 @@ class AppGame():
 
         pygame.sprite.groupcollide(self.block_list_destruct, self.bullet_list, True, True)
 
-        pygame.sprite.groupcollide(self.block_list_destruct, self.bullet_list, False, True)
+        pygame.sprite.groupcollide(self.block_list_undestruct, self.bullet_list, False, True)
 
         self.player.del_bull()  # проверка выхода пули за экран и удаление
 
