@@ -3,7 +3,7 @@ from pygame import *
 
 class Block(sprite.Sprite):
 
-    def __init__(self, topleft, filename):
+    def __init__(self, topleft, filename, destructibility):
         sprite.Sprite.__init__(self)
 
         self.filename = filename
@@ -13,3 +13,5 @@ class Block(sprite.Sprite):
         self.rect = self.image.get_rect()
 
         self.rect.topleft = topleft
+
+        self.destructibility = destructibility

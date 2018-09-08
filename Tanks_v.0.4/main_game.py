@@ -61,16 +61,28 @@ class AppGame():
 
         self.bullet_list = pygame.sprite.Group()  # тес массив спрайтов пули
 
+        self.block_list_destruct = pygame.sprite.Group()  # Массив разрушающихся блоков
+
+        self.block_list_undestruct = pygame.sprite.Group()  # Массив неразрушающихся блоков
+
         self.block_list.add(self.platforms)
 
         self.all_sprites_list.add(self.player, self.enemy)
 
         self.walls = []
 
-        for i in self.block_list:
-            x, y = i.rect.topleft
+        for block in self.block_list:
+            x, y = block.rect.topleft
 
             self.walls.append((x / 32, y / 32))
+
+            if block.destructibility:
+
+                self.block_list_destruct.add(block)
+
+            else:
+
+                self.block_list_undestruct.add(block)
 
         # *************** инициализируем pygame (получаем screen) ***************
 
@@ -162,7 +174,9 @@ class AppGame():
 
         # print ('start', len(self.block_list))
 
-        pygame.sprite.groupcollide(self.block_list, self.bullet_list, True, True)
+        pygame.sprite.groupcollide(self.block_list_destruct, self.bullet_list, True, True)
+
+        pygame.sprite.groupcollide(self.block_list_undestruct, self.bullet_list, False, True)
 
         self.player.del_bull()  # проверка выхода пули за экран и удаление
 
