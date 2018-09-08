@@ -184,8 +184,6 @@ class AppGame():
                 self.block_list_destruct.remove(block)
                 self.block_list.remove(block)
 
-            print(block.health)
-
         pygame.sprite.groupcollide(self.block_list_undestruct, self.bullet_list, False, True)
 
         pygame.sprite
