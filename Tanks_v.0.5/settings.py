@@ -24,7 +24,7 @@ LEVEL_1 = ['Maps/level1.txt', 'Maps/level2.txt']
 
 WALLPAPER = 'Image/wallpaper/O5NY810.jpg'
 
-WHITE = (255, 255, 255) # цвет текста для счета
+WHITE = (255, 255, 255)  # цвет текста для счета
 
 # *************** size elems ***************
 
@@ -34,4 +34,4 @@ SIZE_H = 32
 
 SIZE_W = 32
 
-SIZE_ELEM = (SIZE_H,SIZE_W)
+SIZE_ELEM = (SIZE_H, SIZE_W)

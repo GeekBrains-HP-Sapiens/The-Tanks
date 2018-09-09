@@ -1,2 +1,5 @@
 #Исключаем __pycache__
 Tanks*/__pycache__
+
+#Исключаем DS_Store
+.DS_Store

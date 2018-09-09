@@ -1,4 +1,3 @@
-
 import os
 
 import pygame
@@ -23,8 +22,6 @@ class Level():
         self.cell = []  # для передачи разметки клеток координат
 
         self.tiles = pygame.sprite.Group()  # Массив всех тайлов уровня(тайл - в данном случае, кирпич из которого строятся стенки уровня)"""
-
-
 
         self.Ax = self.Ay = self.Bx = self.By = self.Hx = self.Hy = 0
 

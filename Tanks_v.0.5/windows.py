@@ -8,7 +8,6 @@ import settings
 class Windows():
 
     def __init__(self):
-        
         # *************** окно Game_Window ***************
 
         self.bg = pygame.image.load(settings.WALLPAPER)
@@ -32,7 +31,6 @@ class Windows():
     # *************** рисуем окна ***************
 
     def draw_windows(self, screen):
-
         screen.blit(self.bg, (0, 0))
 
         pygame.draw.rect(screen, self.rect_color_RW, self.rect_rect_RW,
