@@ -14,11 +14,13 @@ BLOCK_1 = 'Image/block/block_01.bmp'
 
 BLOCK_2 = 'Image/block/platform.png'
 
+BASE = 'Image/block/base.png'
+
 PLAYER_BULLET = 'Image/bullet/bulletBlue.png'
 
 ENEMY_BULLET = 'Image/bullet/bulletRed.png'
 
-LEVEL_1 = 'Maps/level1.txt'
+LEVEL_1 = ['Maps/level1.txt', 'Maps/level2.txt']
 
 WALLPAPER = 'Image/wallpaper/O5NY810.jpg'
 

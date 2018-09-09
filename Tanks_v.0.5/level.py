@@ -24,7 +24,9 @@ class Level():
 
         self.tiles = pygame.sprite.Group()  # Массив всех тайлов уровня(тайл - в данном случае, кирпич из которого строятся стенки уровня)"""
 
-        self.Ax = self.Ay = self.Bx = self.By = 0
+
+
+        self.Ax = self.Ay = self.Bx = self.By = self.Hx = self.Hy = 0
 
     # *************** Загрузка Level из файла ***************
 
@@ -50,6 +52,11 @@ class Level():
 
                 if col == "#":
                     self.tiles.add(Block((x, y), settings.BLOCK_2, True, 2))
+
+                    self.cell.append((x, y))
+
+                if col == "H":
+                    self.tiles.add(Base((x, y), settings.BASE, True, 1))
 
                     self.cell.append((x, y))
 

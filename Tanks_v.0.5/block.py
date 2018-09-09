@@ -19,3 +19,11 @@ class Block(sprite.Sprite):
         if self.destructibility:
             
             self.health = health_point
+
+class Base(Block):
+
+	def __init__(self, topleft, filename, destructibility, health_point=None):
+
+		Block.__init__(self, topleft, filename, destructibility, health_point)
+
+		self.end_lvl = True
