@@ -53,6 +53,8 @@ class AppGame():
 
         self.start = (self.level1.ret_B()[0] // settings.SIZE_BLOCK, self.level1.ret_B()[1] // settings.SIZE_BLOCK)
 
+        self.score = 0 # иницилизация счета
+
         # *************** блоки спрайтов ***************
 
         self.block_list = pygame.sprite.Group()  # Это список спрайтов. Каждый блок добавляется в этот список.
@@ -196,6 +198,9 @@ class AppGame():
 
         self.all_sprites_list.draw(self.screen)
 
+        #  отрисовка счета (считает колличество сломанных блоков)
+        self.show_score()
+
         pygame.display.update()  # обновление и вывод всех изменений на экран
 
     # *************** player shot ***************
@@ -221,6 +226,8 @@ class AppGame():
                 self.block_list_destruct.remove(block)
                 
                 self.block_list.remove(block)
+
+                self.score += 1
 
         pygame.sprite.groupcollide(self.block_list_destruct, self.bullet_list, True, True)
 
@@ -252,9 +259,26 @@ class AppGame():
 
         self.init_window()
 
+        pygame.mixer.music.load('Target position.mp3') #подгрузка файла музыки
+
+        pygame.mixer.music.play(-1) #начало воспроизведения потока (-1 обозначает зацикленность потока)
+
         self.action()
 
         self.end_pygame()
+
+    # функция отображения счета
+    def show_score(self):
+
+        s_font = pygame.font.SysFont('Arial', 24)
+
+        text = s_font.render("Score: "+str(self.score),True,settings.WHITE)
+
+        s_rect = text.get_rect()
+
+        s_rect.midtop = (900, 0)
+
+        self.screen.blit(text, s_rect)
 
 
 if __name__ == '__main__':

@@ -22,6 +22,8 @@ LEVEL_1 = 'Maps/level1.txt'
 
 WALLPAPER = 'Image/wallpaper/O5NY810.jpg'
 
+WHITE = (255, 255, 255) # цвет текста для счета
+
 # *************** size elems ***************
 
 SIZE_BLOCK = 32
