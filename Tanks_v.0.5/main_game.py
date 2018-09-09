@@ -39,21 +39,28 @@ class AppGame():
 
         self.TARGET = pygame.USEREVENT # таргет по пользователю
 
-        self.level1 = Level(settings.LEVEL_1)  # Инициализируем level1
+        self.level_count = 0
 
-        self.level1.load_level() # загрузка карты
+        self.score = 0 # иницилизация счета
 
-        self.player = Player(self.level1.ret_A())  # инициализируем Tank по карте
+        # print(self.path)
 
-        self.enemy = Enemy(self.level1.ret_B()) # загрузка Enemy на карте
+    #загрузка уровня
+    def load_level(self):
+        # *************** Инициализация блоков ***************
+        self.level = Level(settings.LEVEL_1[self.level_count])  # Инициализируем level1
 
-        self.platforms = self.level1.ret_tiles() # загрузка блоков на карте
+        self.level.load_level() # загрузка карты
+
+        self.player = Player(self.level.ret_A())  # инициализируем Tank по карте
+
+        self.enemy = Enemy(self.level.ret_B()) # загрузка Enemy на карте
+
+        self.platforms = self.level.ret_tiles() # загрузка блоков на карте
 
         self.end = (self.player.ret_topleft()[0] // settings.SIZE_BLOCK, self.player.ret_topleft()[1] // settings.SIZE_BLOCK)
 
-        self.start = (self.level1.ret_B()[0] // settings.SIZE_BLOCK, self.level1.ret_B()[1] // settings.SIZE_BLOCK)
-
-        self.score = 0 # иницилизация счета
+        self.start = (self.level.ret_B()[0] // settings.SIZE_BLOCK, self.level.ret_B()[1] // settings.SIZE_BLOCK)
 
         # *************** блоки спрайтов ***************
 
@@ -77,10 +84,6 @@ class AppGame():
 
         self.path = AStar(self.start,self.end,self.walls,settings.SIZE_ELEM)
 
-        # print(self.path)
-
-    # *************** Инициализация блоков ***************
-    
     def init_walls(self):
 
         self.walls = []
@@ -108,6 +111,10 @@ class AppGame():
         self.screen = pygame.display.set_mode(self.win_display)  # Создаем окошко
 
         pygame.display.set_caption('Tanks')  # название шапки "капчи"
+
+        pygame.mixer.music.load('Target position.mp3') #подгрузка файла музыки
+
+        pygame.mixer.music.play(-1) #начало воспроизведения потока (-1 обозначает зацикленность потока)
 
         set_timer(self.TARGET, 2000)
 
@@ -227,7 +234,19 @@ class AppGame():
                 
                 self.block_list.remove(block)
 
+                
+
+            # переход на другой уровень
+            if hasattr(block, 'end_lvl'):
                 self.score += 1
+                try: 
+                    self.level_count += 1
+                    self.play_game()
+                except IndexError:
+                    self.level_count = 0
+                    self.play_game()
+                
+
 
         pygame.sprite.groupcollide(self.block_list_destruct, self.bullet_list, True, True)
 
@@ -257,11 +276,7 @@ class AppGame():
 
     def play_game(self):
 
-        self.init_window()
-
-        pygame.mixer.music.load('Target position.mp3') #подгрузка файла музыки
-
-        pygame.mixer.music.play(-1) #начало воспроизведения потока (-1 обозначает зацикленность потока)
+        self.load_level()
 
         self.action()
 
@@ -283,5 +298,7 @@ class AppGame():
 
 if __name__ == '__main__':
     game = AppGame()
+
+    game.init_window()
 
     game.play_game()
