@@ -10,11 +10,11 @@ PLAYER_TANK = 'Image/tanks/tank-player-3.png'
 
 ENEMY_TANK = 'Image/tanks/tank-enemy-1.png'
 
-BLOCK_1 = 'Image/block/block_01.bmp'
+BLOCK_1 = 'Image/block/block-16.png'
 
-BLOCK_2 = 'Image/block/platform.png'
+BLOCK_2 = 'Image/block/block_07.bmp'
 
-BASE = 'Image/block/base.png'
+BASE = 'Image/block/basa2.png'
 
 PLAYER_BULLET = 'Image/bullet/bulletBlue.png'
 

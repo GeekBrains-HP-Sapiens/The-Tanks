@@ -102,7 +102,7 @@ class Player(Tank):
 
     # *************** Удаление снаряда ***************
 
-    def del_bull(self):
+    def del_bullet(self):
 
         for a in self.bullet:
 
@@ -257,199 +257,48 @@ class Enemy(Tank):
 
         self.tank_speedY = 0
 
-    # *************** Столкновение с объектами платформы ***************
-
-    def collide_OBJ(self, platforms):
-
-        x = self.rect.left
-
-        y = self.rect.top
-
-        new_pos_rect = Rect((x - 1, y - 1), (42, 42))
-
-        for p in platforms:
-
-            if Rect.colliderect(new_pos_rect, p.rect):
-                return True
-
-    def collide_UP(self, tank_speedX, tank_speedY, platforms):
-
-        self.new_pos_rect.left = self.rect.left
-
-        self.new_pos_rect.top = self.rect.top
-
-        for p in platforms:
-
-            if Rect.colliderect(self.new_pos_rect, p.rect):
-
-                if tank_speedY < 0:  # if tank_speedX < 0 or tank_speedX > 0 or tank_speedY < 0:
-
-                    self.new_pos_rect.top = p.rect.bottom
-
-                    return True
-
-    def collide_DOWN(self, tank_speedX, tank_speedY, platforms):
-
-        self.new_pos_rect.left = self.rect.left
-
-        self.new_pos_rect.top = self.rect.top
-
-        for p in platforms:
-
-            if Rect.colliderect(self.new_pos_rect, p.rect):
-
-                if tank_speedY > 0:  # if tank_speedX < 0 or tank_speedX > 0 or tank_speedY > 0:
-
-                    self.new_pos_rect.bottom = p.rect.top
-
-                    return True
-
-    def collide_LEFT(self, tank_speedX, tank_speedY, platforms):
-
-        self.new_pos_rect.left = self.rect.left
-
-        self.new_pos_rect.top = self.rect.top
-
-        for p in platforms:
-
-            if Rect.colliderect(self.new_pos_rect, p.rect):
-
-                if tank_speedX < 0:
-                    self.new_pos_rect.left = p.rect.right
-
-                    return True
-
-    def collide_RIGHT(self, tank_speedX, tank_speedY, platforms):
-
-        self.new_pos_rect.left = self.rect.left
-
-        self.new_pos_rect.top = self.rect.top
-
-        for p in platforms:
-
-            if Rect.colliderect(self.new_pos_rect, p.rect):
-
-                if tank_speedX > 0:
-                    self.new_pos_rect.right = p.rect.left
-
-                    return True
-
     # *************** Движение enemy ***************
 
+
     def enemy_move(self, path):
+        
 
-        print(len(path))
+        enemy_x2 = (path[1][0] * settings.SIZE_BLOCK)
 
-        if len(path) <= 1:
-            return
+        enemy_y2 = path[1][1] * settings.SIZE_BLOCK
 
-        x = self.rect.left
 
-        y = self.rect.top
+        if self.rect.top == enemy_y2:
 
-        Ex = x
+            if self.rect.left > enemy_x2:
 
-        Ey = y
-
-        Px = path[1][0] * 32
-
-        Py = path[1][1] * 32
-
-        A = True
-
-        print('!!!!', 'Px ', Px, ' Py ', Py, ' x ', x, ' y ', y)
-
-        if (x, y) not in path:
-            self.DIR_STOP()
-
-            print("OUT OF PATH")
-
-        move_x = move_y = False
-
-        if Ey == Py:
-            move_x = True
-
-            move_y = False
-
-        if Ex == Px:
-            move_y = True
-
-            move_x = False
-
-        print(move_x, '    ', move_y)
-
-        if move_x:
-
-            print("IN MOVE_X IF")
-
-            if Ex > Px:
                 self.DIR_LEFT()
+            
+            if self.rect.left < enemy_x2:
 
-                print('DIR_LEFT - ', 'Ex- ', Ex, 'Px- ', Px)
-
-            if Ex < Px:
                 self.DIR_RIGHT()
+            
+            if self.rect.left == enemy_x2:
 
-                print('DIR_RIGHT - ', 'Ex- ', Ex, 'Px- ', Px)
+                return
 
-            if Ex == Px:
 
-                print('Ex == Px')
+        if self.rect.left == enemy_x2:
 
-                move_x = False
+            if self.rect.top > enemy_y2:
 
-                if len(path) > 1:
-
-                    path.pop(0)
-
-                else:
-
-                    self.DIR_STOP()
-
-        if Ey == Py:
-            move_x = True
-
-            move_y = False
-
-            print('move_x = ', move_x)
-
-        if Ex == Px:
-            move_y = True
-
-            move_x = False
-
-        # ЕСЛИ ДОШЕЛ ДО КОНЦА ПУТИ, ТО ИСКАТЬ НОВЫЙ!!!
-        if move_y:
-
-            if Ey > Py:
                 self.DIR_UP()
+            
+            if self.rect.top < enemy_y2:
 
-                print('DIR_UP - ', 'Ey- ', Ey, 'Py- ', Py)
-
-            if Ey < Py:
                 self.DIR_DOWN()
+            
+            if self.rect.top == enemy_y2:
 
-                print('DIR_DOWN - ', 'Ey- ', Ey, 'Py- ', Py)
+                return
 
-            if Ey == Px:
-
-                if len(path) > 1:
-
-                    path.pop(0)
-
-                else:
-
-                    self.DIR_STOP()
-
-        if Px == Ex and Py == Ey:
-            path.pop(0)
-
-            return
-            # if Ey == Py:
-            #    path.pop(0)
-            #    print 'POP - ','Ey- ',Ey,'Py- ',Py
 
         self.rect.left += self.tank_speedX  # переносим свои положение на tank_speedX
 
         self.rect.top += self.tank_speedY  # переносим свои положение на tank_speedY
-        # return True
+

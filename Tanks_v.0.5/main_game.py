@@ -4,6 +4,8 @@ import pygame
 
 from pygame.time import set_timer
 
+from threading import Thread
+
 from windows import Windows
 
 from level import Level
@@ -37,29 +39,28 @@ class AppGame():
 
         self.windows = Windows()  # инициализируем Windows
 
-        self.TARGET = pygame.USEREVENT  # таргет по пользователю
+        self.TARGET = pygame.USEREVENT # таргет по пользователю
 
         self.level_count = 0
 
-        self.score = 0  # иницилизация счета
+        self.score = 0 # иницилизация счета
 
-        # print(self.path)
+        self.init_window()
 
-    # загрузка уровня
+    #загрузка уровня
     def load_level(self):
         # *************** Инициализация блоков ***************
         self.level = Level(settings.LEVEL_1[self.level_count])  # Инициализируем level1
 
-        self.level.load_level()  # загрузка карты
+        self.level.load_level() # загрузка карты
 
         self.player = Player(self.level.ret_A())  # инициализируем Tank по карте
 
-        self.enemy = Enemy(self.level.ret_B())  # загрузка Enemy на карте
+        self.enemy = Enemy(self.level.ret_B()) # загрузка Enemy на карте
 
-        self.platforms = self.level.ret_tiles()  # загрузка блоков на карте
+        self.platforms = self.level.ret_tiles() # загрузка блоков на карте
 
-        self.end = (
-        self.player.ret_topleft()[0] // settings.SIZE_BLOCK, self.player.ret_topleft()[1] // settings.SIZE_BLOCK)
+        self.end = (self.player.ret_topleft()[0] // settings.SIZE_BLOCK, self.player.ret_topleft()[1] // settings.SIZE_BLOCK)
 
         self.start = (self.level.ret_B()[0] // settings.SIZE_BLOCK, self.level.ret_B()[1] // settings.SIZE_BLOCK)
 
@@ -78,12 +79,12 @@ class AppGame():
         self.block_list.add(self.platforms)
 
         self.all_sprites_list.add(self.player, self.enemy)
+        
+        self.init_walls() # Инициализация блоков
+        
+    # *************** Инициализация поиска пути A_star ***************
 
-        self.init_walls()
-
-        # *************** Инициализация поиска пути A_star ***************
-
-        self.path = AStar(self.start, self.end, self.walls, settings.SIZE_ELEM)
+        self.path = AStar(self.start,self.end,self.walls,settings.SIZE_ELEM)
 
     def init_walls(self):
 
@@ -103,7 +104,7 @@ class AppGame():
 
                 self.block_list_undestruct.add(block)
 
-        # *************** инициализируем pygame (получаем screen) ***************
+    # *************** инициализируем pygame (получаем screen) ***************
 
     def init_window(self):
 
@@ -113,11 +114,64 @@ class AppGame():
 
         pygame.display.set_caption('Tanks')  # название шапки "капчи"
 
-        pygame.mixer.music.load('Target position.mp3')  # подгрузка файла музыки
+        pygame.mixer.music.load('Target position.mp3') #подгрузка файла музыки
 
-        pygame.mixer.music.play(-1)  # начало воспроизведения потока (-1 обозначает зацикленность потока)
+        pygame.mixer.music.play(-1) #начало воспроизведения потока (-1 обозначает зацикленность потока)
 
         set_timer(self.TARGET, 2000)
+
+    # *************** Нажатие кнопок ***************
+
+    def press_button(self,itm):
+
+        if itm.type == pygame.KEYDOWN and itm.key == pygame.K_LEFT:
+            self.left = True
+
+        if itm.type == pygame.KEYUP and itm.key == pygame.K_LEFT:
+            self.left = False
+
+        if itm.type == pygame.KEYDOWN and itm.key == pygame.K_RIGHT:
+            self.right = True
+
+        if itm.type == pygame.KEYUP and itm.key == pygame.K_RIGHT:
+            self.right = False
+
+        if itm.type == pygame.KEYDOWN and itm.key == pygame.K_UP:
+            self.up = True
+
+        if itm.type == pygame.KEYUP and itm.key == pygame.K_UP:
+            self.up = False
+
+        if itm.type == pygame.KEYDOWN and itm.key == pygame.K_DOWN:
+            self.down = True
+
+        if itm.type == pygame.KEYUP and itm.key == pygame.K_DOWN:
+            self.down = False
+
+        if itm.type == pygame.KEYDOWN and itm.key == pygame.K_SPACE:
+            self.space = True
+
+        if itm.type == pygame.KEYUP and itm.key == pygame.K_SPACE:
+            self.shot_bull_game()
+            self.space = False    
+            
+        if (itm.type == pygame.QUIT) or (itm.type == pygame.KEYDOWN and itm.key == pygame.K_ESCAPE):
+            sys.exit(0)
+
+    # *************** Трассер обновления пути от Enemy к Player ***************
+
+    def target_player(self):
+
+        self.end = (self.player.ret_topleft()[
+            0]//settings.SIZE_BLOCK, self.player.ret_topleft()[1]//settings.SIZE_BLOCK)
+
+        self.start = (self.enemy.ret_topleft()[
+            0]//settings.SIZE_BLOCK, self.enemy.ret_topleft()[1]//settings.SIZE_BLOCK)
+
+        # self.init_walls()
+
+        self.path = AStar(self.start, self.end,self.walls, settings.SIZE_ELEM)
+
 
     # *************** обработка процессов и действий (обработка нажатий (mouse and keyboard и др.))
 
@@ -131,56 +185,13 @@ class AppGame():
 
             for itm in pygame.event.get():
 
-                if itm.type == pygame.KEYDOWN and itm.key == pygame.K_LEFT:
-                    self.left = True
+                press_button_thread = Thread(target=self.press_button(itm), daemon=True)
 
-                if itm.type == pygame.KEYUP and itm.key == pygame.K_LEFT:
-                    self.left = False
-
-                if itm.type == pygame.KEYDOWN and itm.key == pygame.K_RIGHT:
-                    self.right = True
-
-                if itm.type == pygame.KEYUP and itm.key == pygame.K_RIGHT:
-                    self.right = False
-
-                if itm.type == pygame.KEYDOWN and itm.key == pygame.K_UP:
-                    self.up = True
-
-                if itm.type == pygame.KEYUP and itm.key == pygame.K_UP:
-                    self.up = False
-
-                if itm.type == pygame.KEYDOWN and itm.key == pygame.K_DOWN:
-                    self.down = True
-
-                if itm.type == pygame.KEYUP and itm.key == pygame.K_DOWN:
-                    self.down = False
-
-                if itm.type == pygame.KEYDOWN and itm.key == pygame.K_SPACE:
-                    self.space = True
-
-                if itm.type == pygame.KEYUP and itm.key == pygame.K_SPACE:
-                    self.shot_bull_game()
-                    self.space = False
-
-                # Трассер обновления пути от Enemy к Player
-
-                if itm.type == self.TARGET:
-                    self.end = (self.player.ret_topleft()[
-                                    0] // settings.SIZE_BLOCK, self.player.ret_topleft()[1] // settings.SIZE_BLOCK)
-
-                    self.start = (self.enemy.ret_topleft()[
-                                      0] // settings.SIZE_BLOCK, self.enemy.ret_topleft()[1] // settings.SIZE_BLOCK)
-
-                    self.init_walls()
-
-                    self.path = AStar(self.start, self.end, self.walls, settings.SIZE_ELEM)
-
-                if (itm.type == pygame.QUIT) or (itm.type == pygame.KEYDOWN and itm.key == pygame.K_ESCAPE):
-                    sys.exit(0)
-
-            self.draw_game()
-
+                press_button_thread.start()
+            
             self.update_game()
+                
+            self.draw_game()
 
     # *************** отобрыжение процессов ***************
 
@@ -194,12 +205,13 @@ class AppGame():
 
         # Отрисовка пути/***** ВРЕМЕННО - ТЕСТ !!! *****/
 
-        for i in self.path:
-            pf = pygame.Surface((32, 32))
+        # for i in self.path:
+            
+        #     pf = pygame.Surface((32,32))
 
-            pf.fill(pygame.Color('#FF6262'))
+        #     pf.fill(pygame.Color('#FF6262'))
 
-            self.screen.blit(pf, (i[0] * 32, i[1] * 32))
+        #     self.screen.blit(pf,(i[0]*32,i[1]*32))
 
         self.all_sprites_list.draw(self.screen)
 
@@ -227,33 +239,44 @@ class AppGame():
             block.health -= 1
 
             if block.health <= 0:
-                self.block_list_destruct.remove(block)
 
+                self.block_list_destruct.remove(block)
+                
                 self.block_list.remove(block)
+
+                
 
             # переход на другой уровень
             if hasattr(block, 'end_lvl'):
                 self.score += 1
-                try:
+                try: 
                     self.level_count += 1
                     self.play_game()
                 except IndexError:
                     self.level_count = 0
                     self.play_game()
+                
+
 
         pygame.sprite.groupcollide(self.block_list_destruct, self.bullet_list, True, True)
 
         pygame.sprite.groupcollide(self.block_list_undestruct, self.bullet_list, False, True)
 
-        self.player.del_bull()  # проверка выхода пули за экран и удаление
+        self.player.del_bullet()  # проверка выхода пули за экран и удаление
 
     # *************** update ***************
 
     def update_game(self):
 
+        self.init_walls()
+
+        target_thread = Thread(target=self.target_player, daemon=True)
+
+        target_thread.start()
+
         self.player.tank_update(self.left, self.right, self.up, self.down, self.space, self.block_list)
 
-        # self.enemy.enemy_move(self.path)
+        self.enemy.enemy_move(self.path)
 
         self.destroy_bull_game()
 
@@ -280,7 +303,7 @@ class AppGame():
 
         s_font = pygame.font.SysFont('Arial', 24)
 
-        text = s_font.render("Score: " + str(self.score), True, settings.WHITE)
+        text = s_font.render("Score: "+str(self.score),True,settings.WHITE)
 
         s_rect = text.get_rect()
 
@@ -290,8 +313,7 @@ class AppGame():
 
 
 if __name__ == '__main__':
-    game = AppGame()
 
-    game.init_window()
+    game = AppGame()
 
     game.play_game()
