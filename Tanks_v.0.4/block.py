@@ -3,7 +3,7 @@ from pygame import *
 
 class Block(sprite.Sprite):
 
-    def __init__(self, topleft, filename, destructibility):
+    def __init__(self, topleft, filename, destructibility, health_point=None):
         sprite.Sprite.__init__(self)
 
         self.filename = filename
@@ -15,3 +15,6 @@ class Block(sprite.Sprite):
         self.rect.topleft = topleft
 
         self.destructibility = destructibility
+
+        if self.destructibility:
+            self.health = health_point

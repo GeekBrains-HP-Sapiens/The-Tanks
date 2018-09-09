@@ -48,7 +48,7 @@ class Level():
                     self.cell.append((x, y))
 
                 if col == "#":
-                    self.tiles.add(Block((x, y), settings.BLOCK_2, True))
+                    self.tiles.add(Block((x, y), settings.BLOCK_2, True, 2))
 
                     self.cell.append((x, y))
 
