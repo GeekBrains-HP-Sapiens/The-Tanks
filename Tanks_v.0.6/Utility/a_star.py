@@ -1,3 +1,23 @@
+# from functools import wraps
+
+# def memorize(func):
+    
+#     @wraps(func)
+#     def g(n, memory={0: 0, 1: 1}):
+
+#         r = memory.get(n)
+
+#         if r is None:
+
+#             r = func(n)
+
+#             memory[n] = r
+
+#         return r
+
+#     return g
+
+# @memorize
 def AStar(start, end, walls, size):
     cells = {(x, y): {'pos': (x, y), 'parent': None, 'g': 0, 'h': max(abs(
         x - end[0]), abs(y - end[1])), 'wall': (x, y) in walls} for y in range(size[1]) for x in range(size[0])}

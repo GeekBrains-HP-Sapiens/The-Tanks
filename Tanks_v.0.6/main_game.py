@@ -6,15 +6,17 @@ from pygame.time import set_timer
 
 from threading import Thread
 
-from windows import Windows
+from Objects.windows import Windows
 
-from level import Level
+from Objects.level import Level
 
-from tank import Tank, Player, Enemy
+from Objects.tank import Tank, Player, Enemy
 
-import settings
+from Objects.sound import SoundGame
 
-from a_star import *
+import Utility.settings as settings
+
+from Utility.a_star import *
 
 
 class AppGame():
@@ -42,6 +44,8 @@ class AppGame():
         self.TARGET = pygame.USEREVENT # таргет по пользователю
 
         self.level_count = 0
+
+        self.sound = SoundGame()
 
         self.score = 0 # иницилизация счета
 
@@ -114,49 +118,50 @@ class AppGame():
 
         pygame.display.set_caption('Tanks')  # название шапки "капчи"
 
-        pygame.mixer.music.load('Target position.mp3') #подгрузка файла музыки
-
-        pygame.mixer.music.play(-1) #начало воспроизведения потока (-1 обозначает зацикленность потока)
+        # self.sound.soundtrack()
 
         set_timer(self.TARGET, 2000)
 
-    # *************** Нажатие кнопок ***************
+     # *************** обработка event ***************
 
-    def press_button(self,itm):
+    def event_game(self):
 
-        if itm.type == pygame.KEYDOWN and itm.key == pygame.K_LEFT:
-            self.left = True
+        for itm in pygame.event.get():
 
-        if itm.type == pygame.KEYUP and itm.key == pygame.K_LEFT:
-            self.left = False
+            if itm.type == pygame.KEYDOWN and itm.key == pygame.K_LEFT:
+                self.left = True
 
-        if itm.type == pygame.KEYDOWN and itm.key == pygame.K_RIGHT:
-            self.right = True
+            if itm.type == pygame.KEYUP and itm.key == pygame.K_LEFT:
+                self.left = False
 
-        if itm.type == pygame.KEYUP and itm.key == pygame.K_RIGHT:
-            self.right = False
+            if itm.type == pygame.KEYDOWN and itm.key == pygame.K_RIGHT:
+                self.right = True
 
-        if itm.type == pygame.KEYDOWN and itm.key == pygame.K_UP:
-            self.up = True
+            if itm.type == pygame.KEYUP and itm.key == pygame.K_RIGHT:
+                self.right = False
 
-        if itm.type == pygame.KEYUP and itm.key == pygame.K_UP:
-            self.up = False
+            if itm.type == pygame.KEYDOWN and itm.key == pygame.K_UP:
+                self.up = True
 
-        if itm.type == pygame.KEYDOWN and itm.key == pygame.K_DOWN:
-            self.down = True
+            if itm.type == pygame.KEYUP and itm.key == pygame.K_UP:
+                self.up = False
 
-        if itm.type == pygame.KEYUP and itm.key == pygame.K_DOWN:
-            self.down = False
+            if itm.type == pygame.KEYDOWN and itm.key == pygame.K_DOWN:
+                self.down = True
 
-        if itm.type == pygame.KEYDOWN and itm.key == pygame.K_SPACE:
-            self.space = True
+            if itm.type == pygame.KEYUP and itm.key == pygame.K_DOWN:
+                self.down = False
 
-        if itm.type == pygame.KEYUP and itm.key == pygame.K_SPACE:
-            self.shot_bull_game()
-            self.space = False    
-            
-        if (itm.type == pygame.QUIT) or (itm.type == pygame.KEYDOWN and itm.key == pygame.K_ESCAPE):
-            sys.exit(0)
+            if itm.type == pygame.KEYDOWN and itm.key == pygame.K_SPACE:
+                self.space = True
+
+            if itm.type == pygame.KEYUP and itm.key == pygame.K_SPACE:
+                self.shot_bull_game()
+                self.space = False 
+                self.sound.sound_shot()   
+                
+            if (itm.type == pygame.QUIT) or (itm.type == pygame.KEYDOWN and itm.key == pygame.K_ESCAPE):
+                sys.exit(0)
 
     # *************** Трассер обновления пути от Enemy к Player ***************
 
@@ -168,8 +173,6 @@ class AppGame():
         self.start = (self.enemy.ret_topleft()[
             0]//settings.SIZE_BLOCK, self.enemy.ret_topleft()[1]//settings.SIZE_BLOCK)
 
-        # self.init_walls()
-
         self.path = AStar(self.start, self.end,self.walls, settings.SIZE_ELEM)
 
 
@@ -179,15 +182,13 @@ class AppGame():
 
         while self.exit_:
 
-            self.timer.tick(60)
+            self.timer.tick(80)
 
-            # *************** обработка ***************
+            target_thread = Thread(target=self.target_player, daemon=True)
 
-            for itm in pygame.event.get():
+            target_thread.start()
 
-                press_button_thread = Thread(target=self.press_button(itm), daemon=True)
-
-                press_button_thread.start()
+            self.event_game()
             
             self.update_game()
                 
@@ -228,7 +229,7 @@ class AppGame():
 
         self.bullet_list.add(self.player.ret_bull())
 
-    # *************** destroy objects ***************
+    # *************** destroy objects + animation ***************
 
     def destroy_objects_game(self):
 
@@ -256,16 +257,21 @@ class AppGame():
                 
                 self.block_list.remove(block)
 
-                
-
             # переход на другой уровень
             if hasattr(block, 'end_lvl'):
+
                 self.score += 1
+
                 try: 
+
                     self.level_count += 1
+
                     self.play_game()
+
                 except IndexError:
+
                     self.level_count = 0
+
                     self.play_game()
                 
 
@@ -281,10 +287,6 @@ class AppGame():
     def update_game(self):
 
         self.init_walls()
-
-        target_thread = Thread(target=self.target_player, daemon=True)
-
-        target_thread.start()
 
         self.player.tank_update(self.left, self.right, self.up, self.down, self.space, self.block_list)
 

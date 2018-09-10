@@ -2,9 +2,9 @@ import os
 
 import pygame
 
-from block import *
+from Objects.block import *
 
-import settings
+import Utility.settings as settings
 
 
 # *************** Класс Level ***************

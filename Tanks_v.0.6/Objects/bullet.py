@@ -1,6 +1,6 @@
 import pygame
 
-import settings
+import Utility.settings as settings
 
 # direction constants
 (DIR_UP, DIR_DOWN, DIR_RIGHT, DIR_LEFT) = range(4)

@@ -1,6 +1,6 @@
 import pygame
 
-import settings
+import Utility.settings as settings
 
 
 # *************** Класс окна (основное window, окно Game_Window, окно Results_Window, окно Chat_Window) ***************

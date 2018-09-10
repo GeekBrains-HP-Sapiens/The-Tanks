@@ -1,10 +1,10 @@
 import pygame
 
-from block import *
+from Objects.block import *
 
-from bullet import *
+from Objects.bullet import *
 
-import settings
+import Utility.settings as settings
 
 
 # direction constants
