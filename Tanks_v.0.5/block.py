@@ -17,7 +17,22 @@ class Block(sprite.Sprite):
         self.destructibility = destructibility
 
         if self.destructibility:
+
             self.health = health_point
+
+    def get_topleft(self):
+
+        return self.rect.topleft
+    
+    def set_image(self,topleft, filename):
+
+        self.filename = filename
+
+        self.image = image.load(self.filename)
+
+        self.rect = self.image.get_rect()
+
+        self.rect.topleft = topleft
 
 
 class Base(Block):

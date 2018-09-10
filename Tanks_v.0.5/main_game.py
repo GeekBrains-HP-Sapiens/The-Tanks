@@ -228,15 +228,27 @@ class AppGame():
 
         self.bullet_list.add(self.player.ret_bull())
 
-    # *************** destroy bullet ***************
+    # *************** destroy objects ***************
 
-    def destroy_bull_game(self):
+    def destroy_objects_game(self):
 
         group_hit_list = pygame.sprite.groupcollide(self.block_list_destruct, self.bullet_list, False, True)
 
         for block in group_hit_list:
 
             block.health -= 1
+
+            if block.health == 2:
+
+                tmp_topleft = block.get_topleft()
+
+                block.set_image(tmp_topleft,settings.BLOCK_DESTRUCT_2)
+
+            if block.health == 1:
+    
+                tmp_topleft = block.get_topleft()
+
+                block.set_image(tmp_topleft,settings.BLOCK_DESTRUCT_3)
 
             if block.health <= 0:
 
@@ -278,7 +290,7 @@ class AppGame():
 
         self.enemy.enemy_move(self.path)
 
-        self.destroy_bull_game()
+        self.destroy_objects_game()
 
         self.player.bull_move()
 

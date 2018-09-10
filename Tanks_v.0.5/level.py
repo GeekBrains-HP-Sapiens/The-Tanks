@@ -43,12 +43,12 @@ class Level():
             for col in row:
 
                 if col == "*":
-                    self.tiles.add(Block((x, y), settings.BLOCK_1, False))
+                    self.tiles.add(Block((x, y), settings.BLOCK_UNDESTRUCT, False))
 
                     self.cell.append((x, y))
 
                 if col == "#":
-                    self.tiles.add(Block((x, y), settings.BLOCK_2, True, 2))
+                    self.tiles.add(Block((x, y), settings.BLOCK_DESTRUCT_1, True, settings.BLOCK_LIFE))
 
                     self.cell.append((x, y))
 
