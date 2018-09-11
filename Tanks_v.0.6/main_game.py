@@ -2,6 +2,8 @@ import sys
 
 import pygame
 
+import pyganim
+
 from pygame.time import set_timer
 
 from threading import Thread
@@ -17,6 +19,8 @@ from Objects.sound import SoundGame
 import Utility.settings as settings
 
 from Utility.a_star import *
+
+from Utility.animation_object import anim_object as anim
 
 
 class AppGame():
@@ -46,6 +50,10 @@ class AppGame():
         self.level_count = 0
 
         self.sound = SoundGame()
+
+        self.anim_explosions = anim(settings.ANIMATION_EXPLOSIONS)
+
+        self.topleft_anim = None
 
         self.score = 0 # иницилизация счета
 
@@ -190,9 +198,10 @@ class AppGame():
 
             self.event_game()
 
-            self.draw_game()
-
             self.update_game()
+
+            self.draw_game()
+            
 
     # *************** отобрыжение процессов ***************
 
@@ -203,6 +212,9 @@ class AppGame():
         self.block_list.draw(self.screen)
 
         self.bullet_list.draw(self.screen)
+
+        self.anim_explosions.blit(self.screen,self.topleft_anim)
+       
 
         # Отрисовка пути/***** ВРЕМЕННО - ТЕСТ !!! *****/
 
@@ -235,49 +247,52 @@ class AppGame():
 
         group_hit_list = pygame.sprite.groupcollide(self.block_list_destruct, self.bullet_list, False, True)
 
-        for block in group_hit_list:
+        if group_hit_list:
+            
+            self.anim_explosions.play()
 
-            block.health -= 1
+            for block, bullet in group_hit_list.items():
 
-            if block.health == 2:
+                self.topleft_anim = bullet[0].ret_center()#  передаем координаты взрыва
 
-                tmp_topleft = block.get_topleft()
+                block.health -= 1
 
-                block.set_image(tmp_topleft,settings.BLOCK_DESTRUCT_2)
+                if block.health == 2:
 
-            if block.health == 1:
-    
-                tmp_topleft = block.get_topleft()
+                    tmp_topleft = block.get_topleft()
 
-                block.set_image(tmp_topleft,settings.BLOCK_DESTRUCT_3)
+                    block.set_image(tmp_topleft,settings.BLOCK_DESTRUCT_2)
 
-            if block.health <= 0:
+                if block.health == 1:
+        
+                    tmp_topleft = block.get_topleft()
 
-                self.block_list_destruct.remove(block)
-                
-                self.block_list.remove(block)
+                    block.set_image(tmp_topleft,settings.BLOCK_DESTRUCT_3)
 
-            # переход на другой уровень
-            if hasattr(block, 'end_lvl'):
+                if block.health <= 0:
 
-                self.score += 1
+                    self.block_list_destruct.remove(block)
+                    
+                    self.block_list.remove(block)
 
-                try: 
+                # переход на другой уровень
+                if hasattr(block, 'end_lvl'):
 
-                    self.level_count += 1
+                    self.score += 1
 
-                    self.play_game()
+                    try: 
 
-                except IndexError:
+                        self.level_count += 1
 
-                    self.level_count = 0
+                        self.play_game()
 
-                    self.play_game()
-                
+                    except IndexError:
 
+                        self.level_count = 0
 
-        pygame.sprite.groupcollide(self.block_list_destruct, self.bullet_list, True, True)
-
+                        self.play_game()
+        
+ 
         pygame.sprite.groupcollide(self.block_list_undestruct, self.bullet_list, False, True)
 
         self.player.del_bullet()  # проверка выхода пули за экран и удаление
