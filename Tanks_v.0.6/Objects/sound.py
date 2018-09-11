@@ -18,9 +18,9 @@ class SoundGame():
 
         self.filename = settings.SOUND_SHOT_1
 
-        pygame.mixer.music.load(self.filename)
+        sound = pygame.mixer.Sound(self.filename)
 
-        pygame.mixer.music.play()
+        sound.play()
 
     def soundtrack(self):
 

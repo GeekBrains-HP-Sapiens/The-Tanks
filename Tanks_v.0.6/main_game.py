@@ -118,7 +118,7 @@ class AppGame():
 
         pygame.display.set_caption('Tanks')  # название шапки "капчи"
 
-        # self.sound.soundtrack()
+        self.sound.soundtrack()
 
         set_timer(self.TARGET, 2000)
 
@@ -189,10 +189,10 @@ class AppGame():
             target_thread.start()
 
             self.event_game()
-            
-            self.update_game()
-                
+
             self.draw_game()
+
+            self.update_game()
 
     # *************** отобрыжение процессов ***************
 
