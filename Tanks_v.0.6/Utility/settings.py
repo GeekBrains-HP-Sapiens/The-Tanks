@@ -30,6 +30,19 @@ WALLPAPER = 'Image/world_1/wallpaper/set8_example_1.png'
 
 # *************** other settings
 
+ANIMATION_EXPLOSIONS = [('Image/world_1/explosions/v_4/4.1.png'),
+                        ('Image/world_1/explosions/v_4/4.2.png'),
+                        ('Image/world_1/explosions/v_4/4.3.png'),
+                        ('Image/world_1/explosions/v_4/4.4.png'),
+                        ('Image/world_1/explosions/v_4/4.5.png'),
+                        ('Image/world_1/explosions/v_4/4.6.png'),
+                        ('Image/world_1/explosions/v_4/4.7.png'),
+                        ('Image/world_1/explosions/v_4/4.8.png'),
+                        ('Image/world_1/explosions/v_4/4.9.png'),
+                        ('Image/world_1/explosions/v_4/4.10.png'),
+                        ('Image/world_1/explosions/v_4/4.11.png'),
+                        ('Image/world_1/explosions/v_4/4.12.png')]
+
 BLOCK_LIFE = 3
 
 LEVEL_1 = ['Maps/level1.txt', 'Maps/level2.txt']

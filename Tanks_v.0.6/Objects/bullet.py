@@ -23,6 +23,14 @@ class Bullet(pygame.sprite.Sprite):
         self.speed = 5
 
         self.direction = direction
+    
+    def ret_center(self):
+
+        return self.rect.center
+
+    def ret_speed(self):
+
+        return self.speed    
 
     def move(self):
 
