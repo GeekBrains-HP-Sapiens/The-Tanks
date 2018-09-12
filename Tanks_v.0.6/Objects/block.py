@@ -20,9 +20,13 @@ class Block(sprite.Sprite):
 
             self.health = health_point
 
-    def get_topleft(self):
+    def ret_topleft(self):
 
         return self.rect.topleft
+    
+    def ret_center(self):
+    
+        return self.rect.center
     
     def set_image(self,topleft, filename):
 

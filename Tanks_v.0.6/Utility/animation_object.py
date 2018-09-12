@@ -1,7 +1,6 @@
 
 import pyganim
 
-
 def anim_object(anim_list, delay=0.1):
 
     boltanim = []

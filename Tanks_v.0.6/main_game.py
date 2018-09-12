@@ -2,9 +2,9 @@ import sys
 
 import pygame
 
-import pyganim
-
 from pygame.time import set_timer
+
+import threading
 
 from threading import Thread
 
@@ -215,17 +215,6 @@ class AppGame():
 
         self.anim_explosions.blit(self.screen,self.topleft_anim)
        
-
-        # Отрисовка пути/***** ВРЕМЕННО - ТЕСТ !!! *****/
-
-        # for i in self.path:
-            
-        #     pf = pygame.Surface((32,32))
-
-        #     pf.fill(pygame.Color('#FF6262'))
-
-        #     self.screen.blit(pf,(i[0]*32,i[1]*32))
-
         self.all_sprites_list.draw(self.screen)
 
         #  отрисовка счета (считает колличество сломанных блоков)
@@ -249,23 +238,28 @@ class AppGame():
 
         if group_hit_list:
             
-            self.anim_explosions.play()
+            self.anim_explosions.play()# запуск анимации
 
-            for block, bullet in group_hit_list.items():
+            t = threading.Timer(1.0, self.anim_explosions.stop) #остановка анимации через 1 сек
+            
+            t.start()
 
-                self.topleft_anim = bullet[0].ret_center()#  передаем координаты взрыва
+            for block in group_hit_list:
+
+                # self.topleft_anim = bullet[0].ret_center()#  передаем координаты взрыва
+                self.topleft_anim = block.ret_topleft()
 
                 block.health -= 1
 
                 if block.health == 2:
 
-                    tmp_topleft = block.get_topleft()
+                    tmp_topleft = block.ret_topleft()
 
                     block.set_image(tmp_topleft,settings.BLOCK_DESTRUCT_2)
 
                 if block.health == 1:
         
-                    tmp_topleft = block.get_topleft()
+                    tmp_topleft = block.ret_topleft()
 
                     block.set_image(tmp_topleft,settings.BLOCK_DESTRUCT_3)
 
