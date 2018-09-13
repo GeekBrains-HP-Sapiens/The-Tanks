@@ -1,5 +1,5 @@
 #Исключаем __pycache__
 */__pycache__
-
+*/*/__pycache__
 #Исключаем DS_Store
 .DS_Store
