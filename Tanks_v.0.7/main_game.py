@@ -40,9 +40,13 @@ class AppGame(InitWindows):
         
         self.timer = pygame.time.Clock()  # Таймер игровых ID процессов
 
-        self.TARGET = pygame.USEREVENT # таргет по ID пользователю 
+        self.TARGET = pygame.USEREVENT # таргет по ID пользователю
+
+        # self.UPDATE = pygame.USEREVENT + 1 # таргет по ID пользователю 
 
         set_timer(self.TARGET, 500) # установка таймера процесса запуска ID
+
+        # set_timer(self.UPDATE, 1) # установка таймера процесса запуска ID
         
 
         # ЗВУКИ В ИГРЕ + ФОН
@@ -67,48 +71,56 @@ class AppGame(InitWindows):
 
         self.score = 0 # иницилизация счета
 
+        self.path = [] 
+
+
 
     #ЗАГРУЗКА УРОВНЯ
 
     def load_level(self):
 
-        # *************** Инициализация блоков ***************
+        # *************** Инициализация элементов карты ***************
         self.level = Level(settings.LEVEL_1[self.level_count])  # Инициализируем level1
 
         self.level.load_level() # загрузка карты
 
-        self.player = Player(self.level.ret_A())  # инициализируем Tank по карте
+        self.player = Player(self.level.ret_player())  # инициализируем Tank по карте
 
-        self.enemy = Enemy(self.level.ret_B()) # загрузка Enemy на карте
+        # self.enemy = Enemy(self.level.ret_B()) # загрузка Enemy на карте +++++++++++++++++++++
 
         self.platforms = self.level.ret_tiles() # загрузка блоков на карте
 
-        self.end = (self.player.ret_topleft()[0] // settings.SIZE_BLOCK, self.player.ret_topleft()[1] // settings.SIZE_BLOCK)
-
-        self.start = (self.level.ret_B()[0] // settings.SIZE_BLOCK, self.level.ret_B()[1] // settings.SIZE_BLOCK)
-
         # *************** блоки спрайтов ***************
 
-        self.block_list = pygame.sprite.Group()  # Это список спрайтов. Каждый блок добавляется в этот список.
+        self.block_list = pygame.sprite.Group()  # Общий список блоков
 
-        self.all_sprites_list = pygame.sprite.Group()  # # Это список каждого спрайта. Все блоки, а также блок игрока.
+        self.player_list = pygame.sprite.Group()  # Список игроков
 
-        self.bullet_list = pygame.sprite.Group()  # Это список спрайтов пули
+        self.bullet_list = pygame.sprite.Group()  # Список пуль
 
-        self.block_list_destruct = pygame.sprite.Group()  # Массив разрушающихся блоков
+        self.block_list_destruct = pygame.sprite.Group()  # Список разрушающихся блоков
 
-        self.block_list_undestruct = pygame.sprite.Group()  # Массив неразрушающихся блоков
+        self.block_list_undestruct = pygame.sprite.Group()  # Список неразрушающихся блоков
 
-        self.block_list.add(self.platforms)
+        self.enemy_list = pygame.sprite.Group() # Список ботов
 
-        self.all_sprites_list.add(self.player, self.enemy)
-        
-        self.init_walls() # Инициализация блоков
-        
-    # *************** Инициализация поиска пути A_star ***************
+        self.block_list.add(self.platforms) # Загрузка всех блоков
 
-        self.path = AStar(self.start,self.end,self.walls,settings.SIZE_ELEM)
+        self.player_list.add(self.player) # Загрузка игроков
 
+        if len(self.level.ret_enemy()) > 0: # Загрузка ботов
+
+            for enemy in self.level.ret_enemy(): # --__--__--__--
+
+                self.enemy_list.add(Enemy(enemy)) # --__--__--__--
+
+        self.init_walls() # Инициализация cтены
+       
+        for enemy in self.enemy_list: # Инициализация поиска пути A_star
+            
+            self.path.append(enemy.ret_path(self.player.ret_end(),self.walls)) # --__--__--__--
+
+    # Инициализация cтены
     def init_walls(self):
 
         self.walls = []
@@ -134,8 +146,10 @@ class AppGame(InitWindows):
 
         for itm in pygame.event.get():
 
-            if itm.type == self.TARGET:
-                self.target_player()
+            if len(self.enemy_list) >0: # пока есть боты
+
+                if itm.type == self.TARGET:
+                    self.target_player()
 
             if itm.type == pygame.KEYDOWN and itm.key == pygame.K_LEFT:
                 self.left = True
@@ -176,14 +190,12 @@ class AppGame(InitWindows):
 
     def target_player(self):
 
-        self.end = (self.player.ret_topleft()[
-            0]//settings.SIZE_BLOCK, self.player.ret_topleft()[1]//settings.SIZE_BLOCK)
+        self.path.clear()
 
-        self.start = (self.enemy.ret_topleft()[
-            0]//settings.SIZE_BLOCK, self.enemy.ret_topleft()[1]//settings.SIZE_BLOCK)
-
-        self.path = AStar(self.start, self.end,self.walls, settings.SIZE_ELEM)
-
+        for enemy in self.enemy_list: # Инициализация поиска пути A_star
+            
+            self.path.append(enemy.ret_path(self.player.ret_end(),self.walls)) # --__--__--__--
+        
     # *************** обработка процессов и действий (обработка нажатий (mouse and keyboard и др.))
 
     def action(self):
@@ -210,8 +222,10 @@ class AppGame(InitWindows):
         self.bullet_list.draw(self.screen)
 
         self.anim_explosions.blit(self.screen,self.topleft_anim)
+
+        self.enemy_list.draw(self.screen)
        
-        self.all_sprites_list.draw(self.screen)
+        self.player_list.draw(self.screen)
 
         #  отрисовка счета (считает колличество сломанных блоков)
         self.show_score()
@@ -284,7 +298,32 @@ class AppGame(InitWindows):
 
                         self.play_game()
         
- 
+        group_enemy_list = pygame.sprite.groupcollide(self.enemy_list, self.bullet_list, False, True)
+
+        if group_enemy_list:
+
+            self.anim_explosions.play()# запуск анимации
+
+            anim_stop = threading.Timer(1.0, self.anim_explosions.stop) #остановка анимации через 1 сек
+            
+            anim_stop.start()
+
+            
+            for enemy in group_enemy_list:
+
+                self.topleft_anim = enemy.ret_topleft()
+
+                enemy.health -= 1
+
+                if enemy.health <= 0:
+
+                    self.score += 1
+
+                    enemy.kill()
+
+                    self.enemy_list.remove(enemy)
+                  
+
         pygame.sprite.groupcollide(self.block_list_undestruct, self.bullet_list, False, True)
 
         self.player.del_bullet()  # проверка выхода пули за экран и удаление
@@ -297,7 +336,9 @@ class AppGame(InitWindows):
 
         self.player.tank_update(self.left, self.right, self.up, self.down, self.space, self.block_list)
 
-        self.enemy.enemy_move(self.path)
+        for index, enemy in enumerate(self.enemy_list): # Движение ботов
+            
+            enemy.enemy_move(self.path[index])
 
         self.destroy_objects_game()
 

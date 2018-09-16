@@ -6,9 +6,11 @@ from Objects.bullet import *
 
 import Utility.settings as settings
 
+from Utility.a_star import AStar
+
 
 # direction constants
-# (DIR_UP, DIR_DOWN, DIR_RIGHT, DIR_LEFT) = range(4)
+(DIR_UP, DIR_DOWN, DIR_RIGHT, DIR_LEFT) = range(4)
 
 # *************** Базовый класс Танк ***************
 
@@ -24,7 +26,7 @@ class Tank(pygame.sprite.Sprite):
 
         self.tank_speedY = 0  # скорость перемещения Y. 0 - стоять на месте
 
-        self.move_speed = 3  # базовая скорость
+        self.move_speed = settings.SPEED_PLAYER  # базовая скорость
 
         self.tank_startX = topleft[0]  # Начальная позиция Х, пригодится когда будем переигрывать уровень
 
@@ -36,7 +38,7 @@ class Tank(pygame.sprite.Sprite):
 
         for p in platforms:
 
-            if sprite.collide_rect(self, p):
+            if pygame.sprite.collide_rect(self, p):
 
                 if tank_speedX > 0:
                     self.rect.right = p.rect.left
@@ -57,7 +59,7 @@ class Player(Tank):
 
     def __init__(self, topleft):
 
-        Tank.__init__(self, topleft)
+        super(Player, self).__init__(topleft)
 
         self.direction = DIR_RIGHT  # положение танка (вверх,вниз и.т.д
 
@@ -100,6 +102,12 @@ class Player(Tank):
         for a in self.bullet:
             a.move()
 
+    # *************** Возвращает конечное положение объекта END ***************
+
+    def ret_end(self):
+
+        return (self.ret_topleft()[0] // settings.SIZE_BLOCK, self.ret_topleft()[1] // settings.SIZE_BLOCK)
+
     # *************** Удаление снаряда ***************
 
     def del_bullet(self):
@@ -137,7 +145,7 @@ class Player(Tank):
 
             self.direction = DIR_LEFT
 
-            self.image = transform.rotate(self.image2, 180)
+            self.image = pygame.transform.rotate(self.image2, 180)
 
         if right:
             self.tank_speedX = self.move_speed  # Право = x + n
@@ -146,7 +154,7 @@ class Player(Tank):
 
             self.direction = DIR_RIGHT
 
-            self.image = transform.rotate(self.image2, 0)
+            self.image = pygame.transform.rotate(self.image2, 0)
 
         if up:
             self.tank_speedY = -self.move_speed  # Вверх = у- п
@@ -155,7 +163,7 @@ class Player(Tank):
 
             self.direction = DIR_UP
 
-            self.image = transform.rotate(self.image2, 90)
+            self.image = pygame.transform.rotate(self.image2, 90)
 
         if down:
             self.tank_speedY = self.move_speed  # Вниз = у+ п
@@ -164,7 +172,7 @@ class Player(Tank):
 
             self.direction = DIR_DOWN
 
-            self.image = transform.rotate(self.image2, 270)
+            self.image = pygame.transform.rotate(self.image2, 270)
 
         if not (left or right):  # стоим, когда нет указаний идти
 
@@ -187,9 +195,9 @@ class Player(Tank):
 
 class Enemy(Tank):
 
-    def __init__(self, topleft):
+    def __init__(self, topleft=(0,0),health_point=settings.ENEMY_HEALTH):
 
-        Tank.__init__(self, topleft)
+        super(Enemy, self).__init__(topleft)
 
         self.direction = None  # DIR_UP#DIR_DOWN# положение Enemy (вверх,вниз и.т.д
 
@@ -199,15 +207,38 @@ class Enemy(Tank):
 
         self.rect.topleft = topleft
 
-        self.move_speed = 1  # базовая скорость
+        self.move_speed = settings.SPEED_ENEMY  # базовая скорость
 
-        self.enemy_life = True
+        self.health = health_point
+
+    
+    # *************** Инициализация координат topleft ***************
+    
+    def init_topleft(self,topleft):
+
+        self.rect.topleft = topleft
 
     # *************** Возвращает координаты левого верхнего угла ***************
 
     def ret_topleft(self):
 
         return self.rect.left, self.rect.top
+
+    # *************** Возвращает начальное положение объекта START ***************
+
+    def ret_start(self):
+
+        return (self.ret_topleft()[0] // settings.SIZE_BLOCK, self.ret_topleft()[1] // settings.SIZE_BLOCK)
+
+
+    # *************** Возвращает путь до объекта player ***************
+
+    def ret_path(self,end,walls):
+
+        return AStar(self.ret_start(), end, walls, settings.SIZE_ELEM)
+
+
+
 
     # *************** Положение вверх ***************
 
@@ -217,7 +248,7 @@ class Enemy(Tank):
 
         self.tank_speedX = 0
 
-        self.image = transform.rotate(self.image2, 0)
+        self.image = pygame.transform.rotate(self.image2, 0)
 
     # *************** Положение вниз ***************
 
@@ -227,7 +258,7 @@ class Enemy(Tank):
 
         self.tank_speedX = 0
 
-        self.image = transform.rotate(self.image2, 180)
+        self.image = pygame.transform.rotate(self.image2, 180)
 
     # *************** Положение влево  ***************
 
@@ -237,7 +268,7 @@ class Enemy(Tank):
 
         self.tank_speedY = 0
 
-        self.image = transform.rotate(self.image2, 90)
+        self.image = pygame.transform.rotate(self.image2, 90)
 
     # *************** Положение вправо ***************
 
@@ -247,7 +278,7 @@ class Enemy(Tank):
 
         self.tank_speedY = 0
 
-        self.image = transform.rotate(self.image2, 270)
+        self.image = pygame.transform.rotate(self.image2, 270)
 
     # *************** Положение остановки ***************
 
@@ -261,41 +292,41 @@ class Enemy(Tank):
 
 
     def enemy_move(self, path):
-        
 
-        enemy_x2 = (path[1][0] * settings.SIZE_BLOCK)
+        if len(path) > 1:
 
-        enemy_y2 = path[1][1] * settings.SIZE_BLOCK
+            enemy_x2 = path[1][0] * settings.SIZE_BLOCK
 
+            enemy_y2 = path[1][1] * settings.SIZE_BLOCK
 
-        if self.rect.top == enemy_y2:
-
-            if self.rect.left > enemy_x2:
-
-                self.DIR_LEFT()
-            
-            if self.rect.left < enemy_x2:
-
-                self.DIR_RIGHT()
-            
-            if self.rect.left == enemy_x2:
-
-                return
-
-
-        if self.rect.left == enemy_x2:
-
-            if self.rect.top > enemy_y2:
-
-                self.DIR_UP()
-            
-            if self.rect.top < enemy_y2:
-
-                self.DIR_DOWN()
-            
             if self.rect.top == enemy_y2:
 
-                return
+                if self.rect.left > enemy_x2:
+
+                    self.DIR_LEFT()
+                
+                if self.rect.left < enemy_x2:
+
+                    self.DIR_RIGHT()
+                
+                if self.rect.left == enemy_x2:
+
+                    return
+
+
+            if self.rect.left == enemy_x2:
+
+                if self.rect.top > enemy_y2:
+
+                    self.DIR_UP()
+                
+                if self.rect.top < enemy_y2:
+
+                    self.DIR_DOWN()
+                
+                if self.rect.top == enemy_y2:
+
+                    return
 
 
         self.rect.left += self.tank_speedX  # переносим свои положение на tank_speedX

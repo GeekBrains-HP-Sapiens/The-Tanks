@@ -19,6 +19,8 @@ class Level():
 
         self.data = []
 
+        self.enemy_list =[]
+
         self.cell = []  # для передачи разметки клеток координат
 
         self.tiles = pygame.sprite.Group()  # Массив всех тайлов уровня(тайл - в данном случае, кирпич из которого строятся стенки уровня)"""
@@ -63,9 +65,11 @@ class Level():
                     self.Ay = y
 
                 if col == "B":
-                    self.Bx = x  # self.A.append((x,y))
+                    self.Bx = x  
 
                     self.By = y
+
+                    self.enemy_list.append((self.Bx, self.By))
 
                 x += self.title_size
 
@@ -89,7 +93,7 @@ class Level():
 
     # *************** Возвращает положение клетки нахождения players ***************
 
-    def ret_A(self):
+    def ret_player(self):
 
         return self.Ax, self.Ay
 
@@ -98,3 +102,7 @@ class Level():
     def ret_B(self):
 
         return self.Bx, self.By
+
+    def ret_enemy(self):
+
+        return self.enemy_list

@@ -45,6 +45,12 @@ ANIMATION_EXPLOSIONS = [('Image/world_1/explosions/v_4/4.1.png'),
 
 BLOCK_LIFE = 3
 
+ENEMY_HEALTH = 2
+
+SPEED_PLAYER = 3
+
+SPEED_ENEMY = 1
+
 LEVEL_1 = ['Maps/level1.txt', 'Maps/level2.txt']
 
 SOUNDTRACK_1 = 'Sound/world_1/Target position.mp3'
