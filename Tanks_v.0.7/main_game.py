@@ -35,6 +35,8 @@ class AppGame(InitWindows):
 
         self.exit_ = True  # флаг для выхода
 
+        self.shot_flag = False
+
 
         # ID ПРОЦЕССОВ + ТАЙМЕР ПРОЦЕССОВ
         
@@ -42,11 +44,13 @@ class AppGame(InitWindows):
 
         self.TARGET = pygame.USEREVENT # таргет по ID пользователю
 
-        # self.UPDATE = pygame.USEREVENT + 1 # таргет по ID пользователю 
+        self.SHOT_ENEMY = pygame.USEREVENT + 1 # таргет по ID пользователю 
 
         set_timer(self.TARGET, 500) # установка таймера процесса запуска ID
 
-        # set_timer(self.UPDATE, 1) # установка таймера процесса запуска ID
+        set_timer(self.SHOT_ENEMY, 1000) # установка таймера процесса запуска ID shoet_enemy
+
+        
         
 
         # ЗВУКИ В ИГРЕ + ФОН
@@ -96,7 +100,9 @@ class AppGame(InitWindows):
 
         self.player_list = pygame.sprite.Group()  # Список игроков
 
-        self.bullet_list = pygame.sprite.Group()  # Список пуль
+        self.bullet_list_player = pygame.sprite.Group()  # Список пуль player
+
+        self.bullet_list_enemy = pygame.sprite.Group()  # Список пуль enemy
 
         self.block_list_destruct = pygame.sprite.Group()  # Список разрушающихся блоков
 
@@ -150,6 +156,12 @@ class AppGame(InitWindows):
 
                 if itm.type == self.TARGET:
                     self.target_player()
+                    
+            if self.shot_flag:
+
+                if itm.type == self.SHOT_ENEMY:
+                    self.shot_bullet_enemy()
+                # print('123')
 
             if itm.type == pygame.KEYDOWN and itm.key == pygame.K_LEFT:
                 self.left = True
@@ -179,7 +191,7 @@ class AppGame(InitWindows):
                 self.space = True
 
             if itm.type == pygame.KEYUP and itm.key == pygame.K_SPACE:
-                self.shot_bull_game()
+                self.shot_bullet_player()
                 self.space = False 
                 self.sound.sound_shot()   
                 
@@ -219,7 +231,9 @@ class AppGame(InitWindows):
 
         self.block_list.draw(self.screen)
 
-        self.bullet_list.draw(self.screen)
+        self.bullet_list_player.draw(self.screen)
+
+        self.bullet_list_enemy.draw(self.screen)
 
         self.anim_explosions.blit(self.screen,self.topleft_anim)
 
@@ -236,17 +250,47 @@ class AppGame(InitWindows):
 
     # *************** player shot ***************
 
-    def shot_bull_game(self):
+    def shot_bullet_player(self):
 
-        self.player.shot_bull()
+        self.bullet_list_player.add(self.player.ret_bullet())
 
-        self.bullet_list.add(self.player.ret_bull())
+    # *************** enemy shot ***************
+
+    def shot_bullet_enemy(self):
+
+        for enemy in self.enemy_list:
+
+            self.bullet_list_enemy.add(enemy.ret_bullet())
+        
 
     # *************** destroy objects + animation ***************
 
     def destroy_objects_game(self):
 
-        group_hit_list = pygame.sprite.groupcollide(self.block_list_destruct, self.bullet_list, False, True)
+        # Разрушаемые блоки и пули игрока
+
+        group_hit_list = pygame.sprite.groupcollide(self.block_list_destruct, self.bullet_list_player, False, True)
+
+        # Не разрушаемые блоки и пули игрока
+
+        pygame.sprite.groupcollide(self.block_list_undestruct, self.bullet_list_player, False, True)
+
+        # Разрушаемые блоки и пули бота
+
+        group_hit_list_2 = pygame.sprite.groupcollide(self.block_list_destruct, self.bullet_list_enemy, False, True)
+
+        # Не разрушаемые блоки и пули бота
+
+        pygame.sprite.groupcollide(self.block_list_undestruct, self.bullet_list_enemy, False, True)
+
+        # Боты и пули игрока
+
+        group_enemy_list = pygame.sprite.groupcollide(self.enemy_list, self.bullet_list_player, False, True)
+
+        # Игрок и пули бота
+
+        group_player_list = pygame.sprite.groupcollide(self.player_list, self.bullet_list_enemy, False, True)
+
 
         if group_hit_list:
             
@@ -281,6 +325,8 @@ class AppGame(InitWindows):
                     
                     self.block_list.remove(block)
 
+                    self.init_walls()
+
                 # переход на другой уровень
                 if hasattr(block, 'end_lvl'):
 
@@ -297,8 +343,59 @@ class AppGame(InitWindows):
                         self.level_count = 0
 
                         self.play_game()
+
         
-        group_enemy_list = pygame.sprite.groupcollide(self.enemy_list, self.bullet_list, False, True)
+        if group_hit_list_2:
+            
+            self.anim_explosions.play()# запуск анимации
+
+            anim_stop = threading.Timer(1.0, self.anim_explosions.stop) #остановка анимации через 1 сек
+            
+            anim_stop.start()
+
+            for block in group_hit_list_2:
+
+                self.topleft_anim = block.ret_topleft()
+
+                block.health -= 1
+
+                if block.health == 2:
+
+                    tmp_topleft = block.ret_topleft()
+
+                    block.set_image(tmp_topleft,settings.BLOCK_DESTRUCT_2)
+
+                if block.health == 1:
+        
+                    tmp_topleft = block.ret_topleft()
+
+                    block.set_image(tmp_topleft,settings.BLOCK_DESTRUCT_3)
+
+                if block.health <= 0:
+
+                    self.block_list_destruct.remove(block)
+                    
+                    self.block_list.remove(block)
+
+                    self.init_walls()
+
+                # переход на другой уровень
+                if hasattr(block, 'end_lvl'):
+
+                    self.score += 1
+
+                    try: 
+
+                        self.level_count += 1
+
+                        self.play_game()
+
+                    except IndexError:
+
+                        self.level_count = 0
+
+                        self.play_game()
+
 
         if group_enemy_list:
 
@@ -322,27 +419,80 @@ class AppGame(InitWindows):
                     enemy.kill()
 
                     self.enemy_list.remove(enemy)
-                  
 
-        pygame.sprite.groupcollide(self.block_list_undestruct, self.bullet_list, False, True)
+                    for bul in self.bullet_list_enemy:#убиваем бота, убиваем и пулю
 
-        self.player.del_bullet()  # проверка выхода пули за экран и удаление
+                        bul.kill()
+
+        
+        if group_player_list:
+
+            self.anim_explosions.play()# запуск анимации
+
+            anim_stop = threading.Timer(1.0, self.anim_explosions.stop) #остановка анимации через 1 сек
+            
+            anim_stop.start()
+            
+            for player in group_player_list:
+
+                self.topleft_anim = player.ret_topleft()
+
+                player.health -= 1
+
+                if player.health <= 0:
+
+                    self.player_list.remove(player)
+
+                    for bul in self.bullet_list_player:#убиваем игрока, убиваем и пулю
+
+                        bul.kill()
+       
+
+       
+        # print(self.player.ret_position())
+
+        # if len(self.bullet_list_player) >0: # если есть пули player
+
+        #     self.player.del_bullet()  # проверка выхода пули за экран и удаление
+
+        
+        # if len(self.bullet_list_enemy) >0: # если есть пули enemy
+
+        #     for enemy in self.enemy_list: # проверка выхода пули за экран и удаление
+
+        #         enemy.del_bullet()
 
     # *************** update ***************
 
     def update_game(self):
 
-        self.init_walls()
-
         self.player.tank_update(self.left, self.right, self.up, self.down, self.space, self.block_list)
 
         for index, enemy in enumerate(self.enemy_list): # Движение ботов
             
-            enemy.enemy_move(self.path[index])
+            enemy.enemy_move(self.path[index],self.block_list)
+
+            if len(self.path[index]) <=5:
+
+                self.shot_flag = True
+            
+            else:
+
+                self.shot_flag =False
 
         self.destroy_objects_game()
 
-        self.player.bull_move()
+
+        if len(self.bullet_list_player) >0: # если есть пули player
+
+            self.player.bullet_move()
+
+
+        if len(self.bullet_list_enemy) >0: # если есть пули enemy
+
+            for enemy in self.enemy_list:
+
+                enemy.bullet_move()
 
     # *************** удаление данных (destroy data here) ***************
 

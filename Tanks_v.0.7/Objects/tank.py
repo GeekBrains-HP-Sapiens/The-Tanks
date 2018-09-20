@@ -51,63 +51,22 @@ class Tank(pygame.sprite.Sprite):
 
                 if tank_speedY < 0:
                     self.rect.top = p.rect.bottom
+    
+    # *************** Возвращает снаряд ***************
 
-
-# *************** Класс player наследум от базового класса Танк ***************
-
-class Player(Tank):
-
-    def __init__(self, topleft):
-
-        super(Player, self).__init__(topleft)
-
-        self.direction = DIR_RIGHT  # положение танка (вверх,вниз и.т.д
-
-        self.image = self.image2 = pygame.image.load(settings.PLAYER_TANK)
-
-        self.rect = self.image.get_rect()
-
-        self.rect.topleft = topleft
-
-        self.bullet = pygame.sprite.Group()
-
-    # *************** Возвращает координаты левого верхнего угла ***************
-
-    def ret_topleft(self):
-
-        return self.rect.topleft
-
-    # *************** Заряжает спрайт снаряда ***************
-
-    def shot_bull(self):
+    def ret_bullet(self):
 
         self.bullet.add(Bullet((self.rect.center), self.direction))
 
-    # *************** Возвращает снаряд ***************
-
-    def ret_bull(self):
-
         return self.bullet
-
-    # *************** Возвращает позицию центра квадрата ***************
-
-    def ret_position(self):
-
-        return self.rect.center
 
     # *************** Движение снаряда ***************
 
-    def bull_move(self):
+    def bullet_move(self):
 
         for a in self.bullet:
             a.move()
-
-    # *************** Возвращает конечное положение объекта END ***************
-
-    def ret_end(self):
-
-        return (self.ret_topleft()[0] // settings.SIZE_BLOCK, self.ret_topleft()[1] // settings.SIZE_BLOCK)
-
+    
     # *************** Удаление снаряда ***************
 
     def del_bullet(self):
@@ -133,6 +92,45 @@ class Player(Tank):
                 a.kill()
 
                 return
+
+
+# *************** Класс player наследум от базового класса Танк ***************
+
+class Player(Tank):
+
+    def __init__(self, topleft, health_point=settings.PLAER_HEALTH):
+
+        super(Player, self).__init__(topleft)
+
+        self.direction = DIR_RIGHT  # положение танка (вверх,вниз и.т.д
+
+        self.image = self.image2 = pygame.image.load(settings.PLAYER_TANK)
+
+        self.rect = self.image.get_rect()
+
+        self.rect.topleft = topleft
+
+        self.bullet = pygame.sprite.Group()
+
+        self.health = health_point
+
+    # *************** Возвращает координаты левого верхнего угла ***************
+
+    def ret_topleft(self):
+
+        return self.rect.topleft
+
+    # *************** Возвращает позицию центра квадрата ***************
+
+    def ret_position(self):
+
+        return self.rect.center
+
+    # *************** Возвращает конечное положение объекта END ***************
+
+    def ret_end(self):
+
+        return (self.ret_topleft()[0] // settings.SIZE_BLOCK, self.ret_topleft()[1] // settings.SIZE_BLOCK)
 
     # *************** Обновление данных танка ***************
 
@@ -209,6 +207,8 @@ class Enemy(Tank):
 
         self.move_speed = settings.SPEED_ENEMY  # базовая скорость
 
+        self.bullet = pygame.sprite.Group()
+
         self.health = health_point
 
     
@@ -237,9 +237,6 @@ class Enemy(Tank):
 
         return AStar(self.ret_start(), end, walls, settings.SIZE_ELEM)
 
-
-
-
     # *************** Положение вверх ***************
 
     def DIR_UP(self):
@@ -249,6 +246,8 @@ class Enemy(Tank):
         self.tank_speedX = 0
 
         self.image = pygame.transform.rotate(self.image2, 0)
+
+        self.direction = DIR_UP
 
     # *************** Положение вниз ***************
 
@@ -260,6 +259,8 @@ class Enemy(Tank):
 
         self.image = pygame.transform.rotate(self.image2, 180)
 
+        self.direction = DIR_DOWN
+
     # *************** Положение влево  ***************
 
     def DIR_LEFT(self):
@@ -269,6 +270,8 @@ class Enemy(Tank):
         self.tank_speedY = 0
 
         self.image = pygame.transform.rotate(self.image2, 90)
+
+        self.direction = DIR_LEFT
 
     # *************** Положение вправо ***************
 
@@ -280,6 +283,8 @@ class Enemy(Tank):
 
         self.image = pygame.transform.rotate(self.image2, 270)
 
+        self.direction = DIR_RIGHT
+
     # *************** Положение остановки ***************
 
     def DIR_STOP(self):
@@ -288,10 +293,20 @@ class Enemy(Tank):
 
         self.tank_speedY = 0
 
+    
+    # *************** Возвращает снаряд ***************
+
+    def ret_bullet(self):
+
+        self.bullet.add(Bullet((self.rect.center), self.direction, settings.ENEMY_BULLET))
+
+        return self.bullet
+        
+
     # *************** Движение enemy ***************
 
 
-    def enemy_move(self, path):
+    def enemy_move(self, path, platforms):
 
         if len(path) > 1:
 
@@ -331,5 +346,8 @@ class Enemy(Tank):
 
         self.rect.left += self.tank_speedX  # переносим свои положение на tank_speedX
 
+        self.collide(self.tank_speedX, 0, platforms)
+        
         self.rect.top += self.tank_speedY  # переносим свои положение на tank_speedY
 
+        self.collide(0, self.tank_speedY, platforms)
