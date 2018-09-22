@@ -28,6 +28,8 @@ ENEMY_BULLET = 'Image/world_1/bullet/bulletRed.png'
 
 WALLPAPER = 'Image/world_1/wallpaper/set8_example_5.png'
 
+GAME_OVER = 'Image/world_1/game_over.png'
+
 # *************** other settings
 
 ANIMATION_EXPLOSIONS = [('Image/world_1/explosions/v_4/4.1.png'),

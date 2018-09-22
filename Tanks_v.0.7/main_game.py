@@ -22,6 +22,13 @@ from Objects.tank import Tank, Player, Enemy
 
 from Objects.sound import SoundGame
 
+from Gameplay.game_over import GameOver
+
+
+#****************************ID процессов игры
+
+(MENU,GAME,GAME_OVER,NEW_GAME,CONTINUE,RESULTS,OPTIONS,EXIT)=(1,2,3,4,5,6,7,8)
+
 
 class AppGame(InitWindows):
 
@@ -29,13 +36,17 @@ class AppGame(InitWindows):
 
         super(AppGame, self).__init__()
 
-        # ФЛАГИ
+        # ФЛАГИ + ИГРОВЫЕ ПРОЦЕССЫ
 
         self.left = self.right = self.up = self.down = self.space = False # Флаги кнопок
 
         self.exit_ = True  # флаг для выхода
 
         self.shot_flag = False
+
+        self.gameplay = GAME # процесс игры
+
+        self.game_over = GameOver()
 
 
         # ID ПРОЦЕССОВ + ТАЙМЕР ПРОЦЕССОВ
@@ -44,14 +55,12 @@ class AppGame(InitWindows):
 
         self.TARGET = pygame.USEREVENT # таргет по ID пользователю
 
-        self.SHOT_ENEMY = pygame.USEREVENT + 1 # таргет по ID пользователю 
+        self.SHOT_ENEMY = pygame.USEREVENT + 1 # ID выстрела бота 
 
         set_timer(self.TARGET, 500) # установка таймера процесса запуска ID
 
-        set_timer(self.SHOT_ENEMY, 1000) # установка таймера процесса запуска ID shoet_enemy
-
-        
-        
+        set_timer(self.SHOT_ENEMY, 1000) # установка таймера процесса запуска ID shoot_enemy
+ 
 
         # ЗВУКИ В ИГРЕ + ФОН
 
@@ -83,14 +92,14 @@ class AppGame(InitWindows):
 
     def load_level(self):
 
+        self.left = self.right = self.up = self.down = self.space = False # Флаги кнопок
+
         # *************** Инициализация элементов карты ***************
         self.level = Level(settings.LEVEL_1[self.level_count])  # Инициализируем level1
 
         self.level.load_level() # загрузка карты
 
         self.player = Player(self.level.ret_player())  # инициализируем Tank по карте
-
-        # self.enemy = Enemy(self.level.ret_B()) # загрузка Enemy на карте +++++++++++++++++++++
 
         self.platforms = self.level.ret_tiles() # загрузка блоков на карте
 
@@ -161,7 +170,6 @@ class AppGame(InitWindows):
 
                 if itm.type == self.SHOT_ENEMY:
                     self.shot_bullet_enemy()
-                # print('123')
 
             if itm.type == pygame.KEYDOWN and itm.key == pygame.K_LEFT:
                 self.left = True
@@ -195,7 +203,7 @@ class AppGame(InitWindows):
                 self.space = False 
                 self.sound.sound_shot()   
                 
-            if (itm.type == pygame.QUIT) or (itm.type == pygame.KEYDOWN and itm.key == pygame.K_ESCAPE):
+            if itm.type == pygame.QUIT or (itm.type == pygame.KEYDOWN and itm.key == pygame.K_ESCAPE):
                 sys.exit(0)
 
     # *************** Трассер обновления пути от Enemy к Player ***************
@@ -216,12 +224,26 @@ class AppGame(InitWindows):
 
             self.timer.tick(60)
 
-            self.event_game()
+            if self.gameplay is GAME: # Игровой процесс 
 
-            self.update_game()
+                self.event_game()
 
-            self.draw_game()
+                self.update_game()
+
+                self.draw_game()
             
+            if self.gameplay is GAME_OVER: # Процесс смерти игрока
+
+                self.game_over.draw(self.screen)
+
+                if self.game_over.event() is GAME:
+
+                    self.gameplay = GAME
+                    
+                    self.load_level()
+
+                    self.score = 0
+
 
     # *************** отобрыжение процессов ***************
 
@@ -441,26 +463,20 @@ class AppGame(InitWindows):
 
                 if player.health <= 0:
 
+                    player.kill()
+
                     self.player_list.remove(player)
 
                     for bul in self.bullet_list_player:#убиваем игрока, убиваем и пулю
 
                         bul.kill()
-       
 
-       
-        # print(self.player.ret_position())
+                    for bul in self.bullet_list_enemy:#убиваем и пулю бота
 
-        # if len(self.bullet_list_player) >0: # если есть пули player
+                        bul.kill()
+                    
+                    self.gameplay = GAME_OVER
 
-        #     self.player.del_bullet()  # проверка выхода пули за экран и удаление
-
-        
-        # if len(self.bullet_list_enemy) >0: # если есть пули enemy
-
-        #     for enemy in self.enemy_list: # проверка выхода пули за экран и удаление
-
-        #         enemy.del_bullet()
 
     # *************** update ***************
 
@@ -496,7 +512,7 @@ class AppGame(InitWindows):
 
     # *************** удаление данных (destroy data here) ***************
 
-    def end_pygame():
+    def end_pygame(self):
 
         pygame.quit()
 
