@@ -30,6 +30,67 @@ from Gameplay.game_over import GameOver
 (MENU,GAME,GAME_OVER,NEW_GAME,CONTINUE,RESULTS,OPTIONS,EXIT)=(1,2,3,4,5,6,7,8)
 
 
+class Menu:
+    def __init__(self, items = [120, 140, "New_menu_item", (250,250,30), (250,30,250), 0]):
+        self.items = items
+
+    def render(self, surface, font, num_item):
+        for i in self.items:
+            if num_item == i[5]:
+                surface.blit(font.render(i[2], 1, i[4]), (i[0], i[1] - 30))
+            else:
+                surface.blit(font.render(i[2], 1, i[3]), (i[0], i[1] - 30))
+
+    def menu(self):
+        window = pygame.display.set_mode((1284, 800))
+        pygame.init()
+        done = True
+        screen = pygame.Surface((1284, 800))
+        font_menu = pygame.font.Font(None, 50)
+        pygame.key.set_repeat(0, 0)
+        pygame.mouse.set_visible(True)
+        punkt = 0
+        while done:
+            screen.fill((0, 100, 200))
+
+            mp = pygame.mouse.get_pos()
+            for i in self.items:
+                if mp[0] > i[0] and mp[0] < i[0] + 155 and mp[1] > i[1] and mp[1] < i[1] + 50:
+                    punkt = i[5]
+            self.render(screen, font_menu, punkt)
+
+            for e in pygame.event.get():
+                if e.type == pygame.QUIT:
+                    game.menu()
+
+                if e.type == pygame.KEYDOWN:
+                    if e.key == pygame.K_ESCAPE:
+                        sys.exit()
+
+                    if e.key == pygame.K_UP:
+                        if punkt > 0:
+                            punkt -= 1
+
+                    if e.key == pygame.K_DOWN:
+                        if punkt < len(self.items) - 1:
+                            punkt += 1
+
+                if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
+                    if punkt == 0:
+                        done = False
+                        game_run = AppGame()
+                        game_run.play_game()
+
+                    elif punkt == 1:
+                        done = False
+
+                    elif punkt == 2:
+                        sys.exit(0)
+
+            window.blit(screen, (0, 0))
+            pygame.display.flip()
+
+
 class AppGame(InitWindows):
 
     def __init__(self):
@@ -165,7 +226,21 @@ class AppGame(InitWindows):
 
                 if itm.type == self.TARGET:
                     self.target_player()
-                    
+            else:
+                self.score += 1
+
+                try:
+
+                    self.level_count += 1
+
+                    self.play_game()
+
+                except IndexError:
+
+                    self.level_count = 0
+
+                    self.play_game()
+
             if self.shot_flag:
 
                 if itm.type == self.SHOT_ENEMY:
@@ -204,7 +279,7 @@ class AppGame(InitWindows):
                 self.sound.sound_shot()   
                 
             if itm.type == pygame.QUIT or (itm.type == pygame.KEYDOWN and itm.key == pygame.K_ESCAPE):
-                sys.exit(0)
+                game.menu()
 
     # *************** Трассер обновления пути от Enemy к Player ***************
 
@@ -235,6 +310,8 @@ class AppGame(InitWindows):
             if self.gameplay is GAME_OVER: # Процесс смерти игрока
 
                 self.game_over.draw(self.screen)
+
+                game.menu()
 
                 if self.game_over.event() is GAME:
 
@@ -559,6 +636,10 @@ class AppGame(InitWindows):
 
 if __name__ == '__main__':
 
-    game = AppGame()
+        # кортеж из пунктов меню, последний сомвол в строке id пункта
+    items = [(120, 140, "New Game", (250, 250, 30), (250, 30, 250), 0),
+                (130, 210, "Resume", (250, 250, 30), (250, 30, 250), 1),
+                (140, 280, "QUIT", (250, 250, 30), (250, 30, 250), 2)]
+    game = Menu(items)
+    game.menu()
 
-    game.play_game()
