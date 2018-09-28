@@ -89,7 +89,7 @@ class Game():
 
         self.left = self.right = self.up = self.down = self.space = False # Флаги кнопок
 
-        self.gameplay = NEW_GAME
+        self.gameplay = NEW_GAME # первоначальный процесс игры
 
         # *************** Инициализация элементов карты ***************
         self.level = Level(settings.LEVEL_1[self.level_count])  # Инициализируем level1
@@ -280,6 +280,10 @@ class Game():
         self.show_score()
 
         self.show_fps()
+
+        self.show_life()
+
+        self.show_level()
 
         pygame.display.update()  # обновление и вывод всех изменений на экран
 
@@ -497,36 +501,65 @@ class Game():
 
         self.action()
 
-    # функция отображения счета
-    def show_score(self):
-
-        s_font = pygame.font.SysFont('Arial', 24)
-
-        text = s_font.render("Score: "+str(self.score),True,settings.WHITE)
-        
-        s_rect = text.get_rect()
-
-        s_rect.midtop = (900, 0)
-
-        self.screen.blit(text, s_rect)
-
-
+    
     # Теcт FPS
 
     def show_fps(self):
 
-        s_font = pygame.font.SysFont('Arial', 24)
-
         fps = int(self.timer.get_fps())
 
-        text = s_font.render("FPS: "+str(fps),True,settings.WHITE)
+        text = self.font.render("FPS: "+str(fps),True,settings.WHITE)
 
+        s_rect = text.get_rect()
+
+        s_rect.midtop = (900,0)
+
+        self.screen.blit(text, s_rect)
+
+    # функция отображения счета
+
+    def show_score(self):
+
+        self.font = pygame.font.SysFont('Arial', 24)
+
+        text = self.font.render("Score: "+str(self.score),True,settings.WHITE)
+        
         s_rect = text.get_rect()
 
         s_rect.midtop = (900, 50)
 
         self.screen.blit(text, s_rect)
 
+    # Life player
+
+    def show_life(self):
+
+        life = self.player.ret_health()
+
+        text = self.font.render("Life: "+str(life),True,settings.WHITE)
+
+        s_rect = text.get_rect()
+
+        s_rect.midtop = (900,100)
+
+        self.screen.blit(text, s_rect)
+    
+    # Level
+
+    def show_level(self):
+
+        level = self.level_count
+
+        text = self.font.render("Level: "+str(level+1),True,settings.WHITE)
+
+        s_rect = text.get_rect()
+
+        s_rect.midtop = (900,150)
+
+        self.screen.blit(text, s_rect)
+
+
+    #вспомогательные модули
 
     def get_id(self):
 
@@ -536,3 +569,13 @@ class Game():
     def set_exit(self,bool):
 
         self.exit_ = bool
+
+
+    def set_level(self,lvl):
+
+        self.level_count = lvl
+
+    
+    def set_score(self,score):
+
+        self.score = score

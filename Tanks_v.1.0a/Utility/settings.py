@@ -69,7 +69,7 @@ SPEED_PLAYER = 3
 
 SPEED_ENEMY = 1
 
-LEVEL_1 = ['Maps/level1.txt', 'Maps/level2.txt']
+LEVEL_1 = ['Maps/level1.txt', 'Maps/level2.txt','Maps/level3.txt']
 
 # *************** sound settings
 

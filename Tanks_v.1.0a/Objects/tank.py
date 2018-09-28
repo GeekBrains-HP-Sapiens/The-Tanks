@@ -114,6 +114,12 @@ class Player(Tank):
 
         self.health = health_point
 
+    # *************** Возвращает health ***************
+
+    def ret_health(self):
+
+        return self.health
+
     # *************** Возвращает координаты левого верхнего угла ***************
 
     def ret_topleft(self):

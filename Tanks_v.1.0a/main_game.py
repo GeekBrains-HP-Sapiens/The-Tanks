@@ -34,6 +34,8 @@ class AppGame(InitWindows):
 
         self.exit_ = True  # флаг для выхода
 
+        self.game_flag = False
+
         self.gameplay = MENU # процесс игры
 
         self.game_over = GameOver()
@@ -60,7 +62,7 @@ class AppGame(InitWindows):
 
                     self.gameplay = NEW_GAME   
 
-                if event == CONTINUE:
+                if event == CONTINUE and self.game_flag is True:
 
                     self.gameplay = CONTINUE  
 
@@ -76,8 +78,14 @@ class AppGame(InitWindows):
             #********** Процесс новой игры ********** 
 
             if self.gameplay == NEW_GAME:
+
+                self.game_flag = True
                     
                 self.game.set_exit(True)
+
+                self.game.set_level(0)
+
+                self.game.set_score(0)
 
                 self.game.load_level()
 
@@ -118,6 +126,8 @@ class AppGame(InitWindows):
             if self.gameplay == GAME_OVER:
 
                 self.game_over.draw(self.screen)
+
+                self.game_flag = False
 
                 if self.game_over.event() == MENU:
 
